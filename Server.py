@@ -1,51 +1,43 @@
-import socket
-import threading
+import asyncio
+import websockets
 
-clients = []
-
-
-def handle_client(client_socket, addr):
-    username = client_socket.recv(1024).decode('utf-8')
-    clients.append((client_socket, username))
-    print(f"[NEW CONNECTION]{username} connected from {addr}")
-    
-    broadcast(f"{username} joined the chat!", client_socket)
-
-    while True:
-        try:
-            msg = client_socket.recv(1024).decode('utf-8')
-            if msg:
-                full_msg = f"{username}: {msg}"
-                print(full_msg)
-                broadcast(full_msg, client_socket)
-            else:
-                break
-        except:
-            break
-
-    clients.remove((client_socket, username))
-    client_socket.close()
-    broadcast(f"{username} left the chat!", client_socket)
+clients = {}  # {websocket: username}
 
 
-def broadcast(msg, sender_socket):
-    for client_socket, _ in clients:
-        if client_socket != sender_socket:
+async def broadcast(message, sender_ws=None):
+    for ws in clients:
+        if ws != sender_ws:
             try:
-                client_socket.send(msg.encode('utf-8'))
+                await ws.send(message)
             except:
-                clients.remove((client_socket, _))
-
-def start_server():
-    server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-    server.bind(("0.0.0.0", 12345))
-    server.listen()
-    print("[SERVER STARTED]  Server is listening...")
-
-    while True:
-        client_socket, addr = server.accept()
-        thread = threading.Thread(target=handle_client, args=(client_socket, addr))
-        thread.start()
+                pass
 
 
-start_server()       
+async def handle_client(websocket):
+    try:
+        username = await websocket.recv()
+        clients[websocket] = username
+        print(f"[NEW CONNECTION] {username} connected")
+
+        await broadcast(f"{username} joined the chat!", websocket)
+
+        async for msg in websocket:
+            full_msg = f"{username}: {msg}"
+            print(full_msg)
+            await broadcast(full_msg, websocket)
+
+    except websockets.ConnectionClosed:
+        pass
+    finally:
+        if websocket in clients:
+            left_username = clients[websocket]
+            print(f"{left_username} disconnected")
+            del clients[websocket]
+            await broadcast(f"{left_username} left the chat!")
+
+async def main():
+    async with websockets.serve(handle_client, "localhost", 6789):
+        print("WebSocket server running on ws://localhost:6789")
+        await asyncio.Future()  # run forever
+
+asyncio.run(main())
