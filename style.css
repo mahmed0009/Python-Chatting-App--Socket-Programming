@@ -1,6 +1,11 @@
 body {
   font-family: Arial, sans-serif;
   padding: 20px;
+  background-color: #f4f4f4;
+}
+
+h2 {
+  text-align: center;
 }
 
 #chat {
@@ -10,6 +15,21 @@ body {
   overflow-y: scroll;
   margin-bottom: 10px;
   background-color: #f9f9f9;
+  border-radius: 5px;
+}
+
+#chat div {
+  margin-bottom: 5px;
+  padding: 5px 8px;
+  background-color: #e0e0e0;
+  border-radius: 4px;
+  max-width: 80%;
+}
+
+.own-message {
+  background-color: #d1ffd1;
+  text-align: right;
+  margin-left: auto;
 }
 
 input[type="text"] {
@@ -20,4 +40,15 @@ input[type="text"] {
 button {
   padding: 10px 15px;
   margin-left: 5px;
+}
+
+@media (max-width: 600px) {
+  input[type="text"] {
+    width: 60%;
+  }
+
+  button {
+    width: 30%;
+    padding: 10px;
+  }
 }

@@ -3,15 +3,12 @@ import websockets
 
 clients = {}  # {websocket: username}
 
-
-async def broadcast(message, sender_ws=None):
+async def broadcast(message):
     for ws in clients:
-        if ws != sender_ws:
-            try:
-                await ws.send(message)
-            except:
-                pass
-
+        try:
+            await ws.send(message)
+        except:
+            pass
 
 async def handle_client(websocket):
     try:
@@ -19,12 +16,12 @@ async def handle_client(websocket):
         clients[websocket] = username
         print(f"[NEW CONNECTION] {username} connected")
 
-        await broadcast(f"{username} joined the chat!", websocket)
+        await broadcast(f"{username} joined the chat!")
 
         async for msg in websocket:
             full_msg = f"{username}: {msg}"
             print(full_msg)
-            await broadcast(full_msg, websocket)
+            await broadcast(full_msg)
 
     except websockets.ConnectionClosed:
         pass

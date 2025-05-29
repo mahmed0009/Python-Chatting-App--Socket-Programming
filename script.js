@@ -11,16 +11,28 @@ socket.onopen = () => {
 socket.onmessage = (event) => {
   const msg = document.createElement("div");
   msg.textContent = event.data;
+
+  // If it's the user's own message, style it
+  if (event.data.startsWith(`${username}:`)) {
+    msg.classList.add("own-message");
+  }
+
   chat.appendChild(msg);
   chat.scrollTop = chat.scrollHeight;
 };
 
 function sendMessage() {
-  const message = input.value;
-  if (message.trim() !== "") {
+  const message = input.value.trim();
+  if (message !== "") {
     socket.send(message);
     input.value = "";
-  }else{
+  } else {
     alert("Please enter a message.");
   }
 }
+
+input.addEventListener("keydown", (e) => {
+  if (e.key === "Enter") {
+    sendMessage();
+  }
+});
