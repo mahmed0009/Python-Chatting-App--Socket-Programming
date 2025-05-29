@@ -1,7 +1,8 @@
 body {
   font-family: Arial, sans-serif;
   padding: 20px;
-  background-color: #f4f4f4;
+  /*background-color: #f4f4f4;*/
+  background-image: url('messages_light_colour_background.jpg');
 }
 
 h2 {
